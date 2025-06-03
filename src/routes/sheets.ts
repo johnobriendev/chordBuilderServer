@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', requireAuth, async (req: Request, res: Response) => {
   try {
     const auth0UserId = req.auth?.payload.sub;
-    
+
     // Find user first
     const user = await prisma.user.findUnique({
       where: { auth0UserId }
@@ -107,9 +107,9 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
 
     // Get sheet with chords
     const sheet = await prisma.chordSheet.findFirst({
-      where: { 
+      where: {
         id,
-        userId: user.id 
+        userId: user.id
       },
       include: {
         chords: {
@@ -129,5 +129,99 @@ router.get('/:id', requireAuth, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+// Update sheet
+router.put('/:id', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const auth0UserId = req.auth?.payload.sub;
+    const { id } = req.params;
+    const { title, description, gridType, gridRows, gridCols, chords } = req.body;
+
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { auth0UserId }
+    });
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Delete existing chords
+    await prisma.chord.deleteMany({
+      where: { sheetId: id }
+    });
+
+    // Update sheet and create new chords
+    const sheet = await prisma.chordSheet.update({
+      where: { 
+        id,
+        userId: user.id 
+      },
+      data: {
+        title,
+        description,
+        gridType,
+        gridRows,
+        gridCols,
+        chords: {
+          create: chords?.map((chord: any, index: number) => ({
+            title: chord.title,
+            positionInSheet: index,
+            numStrings: chord.numStrings,
+            numFrets: chord.numFrets,
+            fretNumbers: chord.fretNumbers,
+            notes: chord.notes,
+            openStrings: chord.openStrings
+          })) || []
+        }
+      },
+      include: {
+        chords: {
+          orderBy: { positionInSheet: 'asc' }
+        }
+      }
+    });
+
+    res.json({ sheet });
+  } catch (error) {
+    console.error('Error updating sheet:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete sheet
+router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const auth0UserId = req.auth?.payload.sub;
+    const { id } = req.params;
+
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { auth0UserId }
+    });
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Delete sheet (chords will be deleted automatically due to cascade)
+    await prisma.chordSheet.delete({
+      where: {
+        id,
+        userId: user.id
+      }
+    });
+
+    res.json({ message: 'Sheet deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting sheet:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 export default router;
