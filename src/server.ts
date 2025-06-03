@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import prisma from './lib/prisma';
 
 import authRoutes from './routes/auth';
+import userRoutes from './routes/users';
+import sheetRoutes from './routes/sheets';
 
 dotenv.config();
 
@@ -60,7 +62,8 @@ app.get('/api/db-test', async (req, res) => {
 
 //api routes
 app.use('/api/auth', authRoutes);
-
+app.use('/api/users', userRoutes);
+app.use('/api/sheets', sheetRoutes);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
