@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  auth0UserId   String   @unique @map("auth0_user_id")
+  displayName   String?  @map("display_name")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  chordSheets   ChordSheet[]
+  sharedSheets  SheetPermission[]
+
+  @@map("users")
+}
+
+model ChordSheet {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  title       String
+  description String?
+  gridType    String   @map("grid_type")
+  gridRows    Int      @map("grid_rows")
+  gridCols    Int      @map("grid_cols")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chords      Chord[]
+  permissions SheetPermission[]
+
+  @@map("chord_sheets")
+}
+
+model Chord {
+  id              String   @id @default(cuid())
+  sheetId         String   @map("sheet_id")
+  title           String
+  positionInSheet Int      @map("position_in_sheet")
+  numStrings      Int      @map("num_strings")
+  numFrets        Int      @map("num_frets")
+  fretNumbers     Json     @map("fret_numbers")
+  notes           Json
+  openStrings     Json     @map("open_strings")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  sheet ChordSheet @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+
+  @@map("chords")
+}
+
+model SheetPermission {
+  id              String   @id @default(cuid())
+  sheetId         String   @map("sheet_id")
+  userId          String   @map("user_id")
+  permissionLevel String   @map("permission_level") // "viewer"
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  sheet ChordSheet @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sheetId, userId])
+  @@map("sheet_permissions")
+}
