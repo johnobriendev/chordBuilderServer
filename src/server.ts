@@ -3,8 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import prisma from './lib/prisma';
-
+import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import sheetRoutes from './routes/sheets';
@@ -16,17 +15,48 @@ const PORT = process.env.PORT || 5000;
 
 // Security and logging middleware
 app.use(helmet());
-app.use(cors());
-app.use(morgan('combined'));
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-frontend-domain.vercel.app', 'https://your-custom-domain.com'] 
+    : 'http://localhost:5173',
+  credentials: true
+}));
+
+// Logging (only in development)
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('combined'));
+}
+
+
+// Rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per 15 minutes per IP
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 auth requests per 15 minutes per IP
+  message: { error: 'Too many authentication attempts, please try again later.' }
+});
+
+const sheetLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 30, // 30 sheet operations per 10 minutes per IP
+  message: { error: 'Too many sheet operations, please slow down.' }
+});
+
+// Apply rate limiting
+app.use(generalLimiter);
 
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Test route
-app.get('/', (req, res) => {
-  res.json({ message: 'Server is running!' });
-});
+
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -37,40 +67,23 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Basic API route
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API is working!' });
-});
-
-//db test route
-app.get('/api/db-test', async (req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1 as test`;
-    res.json({ 
-      database: 'connected', 
-      timestamp: new Date().toISOString() 
-    });
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).json({ 
-      database: 'disconnected', 
-      error: 'Connection failed' 
-    });
-  }
-});
 
 
 //api routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/sheets', sheetRoutes);
+app.use('/api/sheets', sheetLimiter, sheetRoutes);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Error:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  } else {
+    console.error(err.stack);
+    res.status(500).json({ error: err.message });
+  }
 });
-
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
