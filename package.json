@@ -1,11 +1,11 @@
 {
   "name": "chordbuilderserver",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/server.ts",
     "type-check": "tsc --noEmit"
   },
   "repository": {
@@ -32,15 +32,15 @@
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.2.0",
     "morgan": "^1.10.0",
-    "prisma": "^6.8.2"
-  },
-  "devDependencies": {
+    "prisma": "^6.8.2",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/express-jwt": "^6.0.4",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^22.15.29",
+    "@types/node": "^22.15.29"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
