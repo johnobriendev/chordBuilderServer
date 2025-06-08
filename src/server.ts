@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.vercel.app', 'https://your-custom-domain.com'] 
+    ? ['https://chordbuilder.netlify.app/', 'https://your-custom-domain.com'] 
     : 'http://localhost:5173',
   credentials: true
 }));
