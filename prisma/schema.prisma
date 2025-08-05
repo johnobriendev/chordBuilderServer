@@ -48,6 +48,7 @@ model Chord {
   fretNumbers     Json     @map("fret_numbers")
   notes           Json
   openStrings     Json     @map("open_strings")
+  rootNote        String?  @map("root_note")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
