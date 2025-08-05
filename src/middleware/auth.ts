@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config(); 
+
 import { auth } from 'express-oauth2-jwt-bearer';
 
 
