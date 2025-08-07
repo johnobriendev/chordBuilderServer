@@ -72,7 +72,7 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
             fretNumbers: chord.fretNumbers,
             notes: chord.notes,
             openStrings: chord.openStrings,
-            rootNote: chord.rootNote || null
+            rootNotes: chord.rootNotes || []
           })) || []
         }
       },
@@ -176,7 +176,7 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
             fretNumbers: chord.fretNumbers,
             notes: chord.notes,
             openStrings: chord.openStrings,
-            rootNote: chord.rootNote || null
+            rootNotes: chord.rootNotes || []
           })) || []
         }
       },
