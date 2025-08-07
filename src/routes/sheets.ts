@@ -1,3 +1,4 @@
+//src/routes/sheets.ts
 import express, { Request, Response } from 'express';
 import { requireAuth } from '../middleware/auth';
 import prisma from '../lib/prisma';
@@ -70,7 +71,8 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
             numFrets: chord.numFrets,
             fretNumbers: chord.fretNumbers,
             notes: chord.notes,
-            openStrings: chord.openStrings
+            openStrings: chord.openStrings,
+            rootNote: chord.rootNote || null
           })) || []
         }
       },
@@ -173,7 +175,8 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
             numFrets: chord.numFrets,
             fretNumbers: chord.fretNumbers,
             notes: chord.notes,
-            openStrings: chord.openStrings
+            openStrings: chord.openStrings,
+            rootNote: chord.rootNote || null
           })) || []
         }
       },
