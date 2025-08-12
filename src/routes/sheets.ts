@@ -72,7 +72,10 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
             fretNumbers: chord.fretNumbers,
             notes: chord.notes,
             openStrings: chord.openStrings,
-            rootNotes: chord.rootNotes || []
+            rootNotes: chord.rootNotes || [],
+            xMarks: chord.xMarks || [],
+            triangles: chord.triangles || [],
+            squares: chord.squares || []
           })) || []
         }
       },
@@ -157,9 +160,9 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
 
     // Update sheet and create new chords
     const sheet = await prisma.chordSheet.update({
-      where: { 
+      where: {
         id,
-        userId: user.id 
+        userId: user.id
       },
       data: {
         title,
@@ -176,7 +179,10 @@ router.put('/:id', requireAuth, async (req: Request, res: Response) => {
             fretNumbers: chord.fretNumbers,
             notes: chord.notes,
             openStrings: chord.openStrings,
-            rootNotes: chord.rootNotes || []
+            rootNotes: chord.rootNotes || [],
+            xMarks: chord.xMarks || [],
+            triangles: chord.triangles || [],
+            squares: chord.squares || []
           })) || []
         }
       },

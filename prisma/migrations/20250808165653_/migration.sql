@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "chords" ALTER COLUMN "x_marks" DROP DEFAULT,
+ALTER COLUMN "triangles" DROP DEFAULT,
+ALTER COLUMN "squares" DROP DEFAULT;

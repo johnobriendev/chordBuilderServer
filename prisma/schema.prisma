@@ -49,6 +49,9 @@ model Chord {
   notes           Json
   openStrings     Json     @map("open_strings")
   rootNotes       Json     @map("root_notes")
+  xMarks          Json     @map("x_marks")     
+  triangles       Json     @map("triangles")    
+  squares         Json     @map("squares")      
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
